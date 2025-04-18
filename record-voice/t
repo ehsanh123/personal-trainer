@@ -1,2 +1,15 @@
 # personal-trainer
-this app is going to be an app that works as - 
+# Audio Recording and Upload App
+
+This is a simple web application built using Flask that allows users to record their voice through the browser, and then upload the audio file to the server. The backend is powered by Flask, and the frontend uses HTML and JavaScript to capture and send audio.
+
+## Features
+
+- Record audio directly in the browser using the microphone.
+- Stop the recording and automatically upload the audio file to the server.
+- Server-side storage for the audio file.
+
+## Installation
+
+1. Clone this repository:
+
