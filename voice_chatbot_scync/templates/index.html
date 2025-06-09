@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Async Chatbot</title>
+    <script src="/static/script.js"></script>
+    <!-- Video from camera and stuff -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script> -->
+
+    
+<!--
+        
+        async function uploadToBackend(imageData) {
+            const response = await fetch("/upload-photo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ image: imageData })
+            });
+
+            const result = await response.json();
+            console.log("Backend Response:", result);
+        }
+
+        function setupPose() {
+            const canvas = document.getElementById('image1');
+            const ctx = canvas.getContext('2d');
+            const video = document.getElementById('video');
+
+            pose = new Pose.Pose({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                }
+    });
+
+    pose.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+
+    pose.onResults(results => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (results.poseLandmarks) {
+            drawLandmarks(ctx, results.poseLandmarks);
+        }
+    });
+
+    camera = new Camera(video, {
+                onFrame: async () => {
+                    await pose.send({ image: video });
+                },
+                width: 400,
+                height: 300
+            });
+            camera.start();
+        }
+
+        function drawLandmarks(ctx, landmarks) {
+    for (const landmark of landmarks) {
+        ctx.beginPath();
+        ctx.arc(landmark.x * ctx.canvas.width, landmark.y * ctx.canvas.height, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
+    }
+}
+    </script> -->
+    <!-- Load image -->
+    
+    <script src="/static/script2.js"></script>
+
+    <script src="/static/script3.js"></script>
+
+    <script >  
+        let livePoseRunning = false;
+
+function startLivePose() {
+    livePoseRunning = true;
+    document.getElementById("poseStatus").innerText = "Status: Live";
+
+    const video = document.getElementById('video');
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = 400;
+    tempCanvas.height = 300;
+
+    async function loop() {
+        if (!livePoseRunning) return;
+
+        // Grab frame directly to temp canvas (NOT shown)
+        tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+        const imageData = tempCanvas.toDataURL('image/png');
+
+        await uploadAndDisplayPose(imageData);
+
+        setTimeout(() => {
+            requestAnimationFrame(loop);
+        }, 100); // ~10 FPS
+    }
+
+    loop();
+}
+
+function stopLivePose() {
+    livePoseRunning = false;
+    document.getElementById("poseStatus").innerText = "Status: Stopped";
+}
+
+async function uploadAndDisplayPose(imageData) {
+    const canvas = document.getElementById("image1");
+    const ctx = canvas.getContext("2d");
+
+    try {
+        const response = await fetch("/upload-photo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imageData })
+        });
+
+        const result = await response.json();
+        const img = new Image();
+        img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = result.processed_image;
+
+    } catch (err) {
+        console.error("Pose detection failed:", err);
+        document.getElementById("poseStatus").innerText = "Status: Error";
+    }
+}
+
+
+    </script>
+
+
+
+    <script>
+
+// let poseInterval = null;
+
+// function startLivePose() {
+//     document.getElementById("poseStatus").innerText = "Status: Running...";
+
+//     poseInterval = setInterval(() => {
+//         const video = document.getElementById('video');
+//         const canvas = document.getElementById('image1');
+//         const ctx = canvas.getContext('2d');
+
+//         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+//         const imageData = canvas.toDataURL('image/png');
+
+//         uploadAndDisplayPose(imageData);
+//     }, 1000);
+// }
+
+// function stopLivePose() {
+//     document.getElementById("poseStatus").innerText = "Status: Stopped";
+//     if (poseInterval) {
+//         clearInterval(poseInterval);
+//         poseInterval = null;
+//     }
+// }
+
+// async function uploadAndDisplayPose(imageData) {
+//     const canvas = document.getElementById("image1");
+//     const ctx = canvas.getContext("2d");
+
+//     try {
+//         const response = await fetch("/upload-photo", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({ image: imageData })
+//         });
+
+//         const result = await response.json();
+//         const img = new Image();
+//         img.onload = () => {
+//             ctx.clearRect(0, 0, canvas.width, canvas.height);
+//             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+//         };
+//         img.src = result.processed_image;
+
+//     } catch (err) {
+//         console.error("Pose detection failed:", err);
+//         document.getElementById("poseStatus").innerText = "Status: Error";
+//     }
+// }
+
+    </script>
+    
+</head>
+
+
+<body>
+    <h2>AI Phsical Trainer</h2>
+    <button id="btn1" onclick="record_voice()"> Start Recording </button>  
+    <p><strong>Recording Status:</strong><span id="status_recording">Idle</p>
+
+    
+    <input type="text" id="userInput" placeholder="Say something..." />
+    <button onclick="sendMessage()">Send</button>
+    <p><strong>Bot Status:</strong> <span id="status">Idle</span></p>
+    <p><strong>Response:</strong> <p id="botReply"></span></p> 
+    <h2>Live Camera with Pose Detection</h2>
+
+    <video id="video" width="400" height="300" autoplay muted style="border: 1px solid #000;"></video>
+    <canvas id="image1" width="400" height="300" style="border:1px solid #000000;"></canvas>
+    <!-- <canvas id="overlayCanvas" width="400" height="300" style="position:absolute; top:0; left:0;"></canvas> -->
+    
+    <p id="poseStatus">Status: Idle</p>
+    <button onclick="startLivePose()">Start Live Pose Detection</button>
+    <button onclick="stopLivePose()">Stop</button>
+
+
+    <br>
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="stopCamera()">Stop Camera</button>
+    <button onclick="takePhoto()">Take Photo</button>    
+    
+
+    <input type="file" id="imageLoader" accept="image/*" style="display: none;" />
+    <br><br>
+    <button id="btn1" onclick="loadImageFromButton()">Load Image</button>
+
+    <br><br>
+    <strong>Pose Detector Status:</strong> <p id="uploadStatus">Idle</p>
+    
+    
+    <button onclick="uploadCanvasImage()">Pose detection</button>
+    <br>
+    
+
+</body>
+</html>
+
+
+
+

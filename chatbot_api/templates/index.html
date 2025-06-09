@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Microphone Recorder with AI Chatbot</title>
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+</head>
+
+<body>
+  <h1>Record Your Voice</h1>
+  <form action="/start-recording" method="post">
+    <button type="submit"> {{ recording1 }}</button>
+  </form>
+  
+  <p id="status">{{ status }}</p>
+
+  <h2>Chat with AI</h2>
+  <form action="/send-button" method="post">  
+    <div style="margin-top: 10px;">
+      <input type="text" id="text-input" name = "user-input"
+      placeholder="Type your message here"
+      value="{{ input_text }}" 
+      style="width: 300px; padding: 5px; font-size: 16px;">
+    </div>
+    
+    <div style="margin-top: 5px;">
+    
+      <button id="send-button1" style="margin-top: 5px; padding: 8px 12px; font-size: 16px;">Send</button>
+      
+    </div>
+
+  </form>
+  <!-- <df-messenger
+    location="europe-west2"
+    project-id="plenary-stacker-457109-k5"
+    agent-id="c827abce-ac66-40e5-a7e5-aba7e90b74ae"
+    language-code="en">
+    <df-messenger-chat-bubble chat-title="AI PT"></df-messenger-chat-bubble>
+  </df-messenger>
+
+  <style>
+    df-messenger {
+      z-index: 999;
+      position: fixed;
+      --df-messenger-font-color: #000;
+      --df-messenger-font-family: Google Sans;
+      --df-messenger-chat-background: #f3f6fc;
+      --df-messenger-message-user-background: #d3e3fd;
+      --df-messenger-message-bot-background: #fff;
+      bottom: 16px;
+      right: 16px;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script> -->
+</body>
+</html>

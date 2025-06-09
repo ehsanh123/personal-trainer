@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Async Chatbot</title>
+    
+    <!-- Load image -->
+    <!-- <script src="/static/image.js"></script> -->
+    <script>
+        
+
+async function loadImage1(a) {
+    const inputEl = document.getElementById("poseStatus");
+    
+    im_bax = 'ref_img1';
+    inputEl.innerText = "Loading Refernce image 1...";
+    if (a == '2') {
+        im_bax = 'ref_img2';
+        inputEl.innerText = "Loading referrance image 2";
+    }
+
+    const fileInput = document.getElementById("imageLoader");
+
+    return new Promise((resolve) => {
+        fileInput.onchange = function () {
+            const file = fileInput.files[0];
+
+            if (!file) {
+                inputEl.innerText = "No file selected";
+                resolve(null);
+                return;
+            }
+
+            inputEl.innerText = "Refernce 1 loaded";
+            if (a == '2') inputEl.innerText = "Refernce 3 loaded";
+            
+
+            // Optionally load image into canvas
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.getElementById(im_bax);
+                    const ctx = canvas.getContext("2d");
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            resolve(file);
+        };
+
+        // Trigger file picker
+        fileInput.click();
+    });
+}
+
+
+async function poseImages() {
+    await uploadCanvasImage('1');
+    await uploadCanvasImage('2');
+}
+
+async function uploadCanvasImage(a) {
+    const statusEl = document.getElementById("poseStatus");
+    statusEl.innerText = "Status: Preparing to upload...";
+    a1 = a;
+    if (a == '1') a1 = '1'
+    else if (a == '2')  a1 = '2';
+    else a1 = '3';
+
+    ref1 = 'ref_img2';
+    if (a =='1') ref1 = 'ref_img1';
+    else if (a == '2') ref1 = 'ref_img2';
+    else ref1 = 'image1';
+    
+    const canvas = document.getElementById(ref1);
+    
+
+    if (!canvas) {
+        statusEl.innerText = "Image not found";
+        // console.error("Canvas not found");
+        return;
+    }
+
+    statusEl.innerText = "Status: Preparing image...";
+
+    // const canvas = document.getElementById("image1");
+    const imageData = canvas.toDataURL('image/png');
+
+    const ctx = canvas.getContext("2d");
+
+    try {
+        
+        statusEl.innerText = "Status: 1";
+        const response = await fetch("/upload-photo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imageData , "name":a1})
+        });
+        
+        statusEl.innerText = "Status: 2";
+        const result = await response.json();
+        const img = new Image();
+        img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+
+        statusEl.innerText = 'stats 3';//text;
+        img.src = result.processed_image;
+        
+
+        let text = "Status:\n";
+        // for (const [key, value] of Object.entries(result.angles)) {
+            // text += `${key}: ${value}\n`;
+        // }
+        
+        statusEl.innerText = text;
+
+        
+        // statusEl.innerText = "Status: Image " + a + " processed successfully ✅";
+
+    } catch (err) {
+        console.error("Pose detection failed:", err);
+        statusEl.innerText = "Status: Error"+err.toString();
+    }
+}
+
+    </script>
+    
+
+    <!-- live camera running -->
+    <script src="/static/video.js"></script>
+
+    <!-- live pose detection -->
+    <script src="/static/pose.js"></script>
+    
+
+    <!-- chatbot -->
+    <script src="/static/voice.js"></script>
+    
+</head>
+
+
+<body>
+    <h1>AI Phsical Trainer</h1>
+    <!-- voice bot -->
+    <h2>Chatbot</h2>
+    <input type="text" id="userInput" placeholder="Chat with AI..." />
+
+    <!-- <p><strong>.</strong>  -->
+    <p id="botReply"></p>
+    <!-- </p>  -->
+
+    <button id = "btn1" onclick="startRecording()">Voice command</button>
+    <button onclick="stopRecording()">End Command1</button>
+    <button onclick="sendMessage()">Send to Chatbot</button>
+    <p><strong>Recording:</strong><span id="status_recording">Idle</span>
+    <strong>Bot:</strong> <span id="status">Idle</span></p>
+    
+    <!-- images -->
+    <h2>Refrence images</h2>
+    <canvas id="ref_img1" width="200" height="300" style="border:1px solid #000000;"></canvas>
+    <canvas id="ref_img2" width="200" height="300" style="border:1px solid #000000;"></canvas>
+
+    <input type="file" id="imageLoader" accept="image/*" style="display: none;" />
+    <br><br>
+    <button id="btn_load1" onclick="loadImage1('1')">Load Ref1</button>
+    <button id="btn_load2" onclick="loadImage1('2')">Load Ref2</button>
+    <button onclick="poseImages ()">Pose detection</button>
+
+    <!-- live video -->
+    <h2>Live Camera</h2>
+    <video id="video" width="200" height="300" autoplay muted style="border: 1px solid #000;"></video>
+    <canvas id="image1" width="200" height="300" style="border:1px solid #000000;"></canvas>
+    <!-- <canvas id="overlayCanvas" width="400" height="300" style="position:absolute; top:0; left:0;"></canvas> -->
+    
+    <p id="poseStatus">Status: Idle</p>
+    <button onclick="startLivePose()">Start Live Pose Detection</button>
+    <button onclick="stopLivePose()">Stop</button>
+    <br>
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="stopCamera()">Stop Camera</button>
+    <button onclick="takePhoto()">Take Photo</button>    
+    
+
+    <!-- <input type="file" id="imageLoader" accept="image/*" style="display: none;" /> -->
+    <!-- <button id="btn1" onclick="loadImageFromButton()">Load Image</button> -->
+    <!-- <strong>Pose Detector Status:</strong> <p id="uploadStatus">Idle</p> -->
+    
+    
+    <br>
+    
+
+</body>
+</html>
+
+
+
+
